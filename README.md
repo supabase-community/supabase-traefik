@@ -1,6 +1,6 @@
 # Supabase Docker with Traefik
 
-Note: this setup is unnofficial. It is supported by the Supabase community only.
+Note: this setup is unofficial. It is supported by the Supabase community only.
 
 This guide is covering a self-hosted Supabase setup with [Traefik](https://github.com/traefik/traefik) as a reverse proxy.
 
