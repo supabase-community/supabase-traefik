@@ -1,40 +1,44 @@
-version: "3.7"
+version: '3.9'
 services:
-    traefik:
-        container_name: traefik
-        image: traefik
-        restart: always
-        ports:
-            - 80:80
-            - 443:443/udp
-            - 443:443/tcp
-        networks:
-            - rp
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-            - ./letsencrypt:/letsencrypt
-            - ./traefik/traefik.yml:/traefik/traefik.yaml
-        environment:
-            - PDNS_API_KEY=${PDNS_API_KEY}
-            - PDNS_API_URL=https://${PDNS_API_URL}
-        command:
-            - --providers.docker=true
-            - --providers.docker.exposedbydefault=false
-            - --entrypoints.web.address=:80
-            - --entrypoints.websecure.address=:443
-            - --certificatesresolvers.default.acme.dnschallenge=true
-            - --certificatesresolvers.default.acme.dnschallenge.provider=${ACME_DNS_CHALLENGE_PROVIDER}
-            - --certificatesresolvers.default.acme.email=${ACME_EMAIL}
-            - --certificatesresolvers.default.acme.storage=/letsencrypt/acme.json
-            - --providers.file.filename=/traefik/traefik.yaml
-        labels:
-            traefik.enable: "true"
-            # redirect to https
-            traefik.http.routers.http-catchall.rule: "hostregexp(`{host:.+}`)"
-            traefik.http.routers.http-catchall.entrypoints: "web"
-            traefik.http.routers.http-catchall.middlewares: "redirect-to-https"
-            traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
-            traefik.http.middlewares.redirect-to-https.redirectscheme.permanent: "true"
+  traefik:
+    container_name: traefik
+    hostname: traefik
+    image: traefik:latest
+    ports:
+      - 8001:80
+      - 44301:443
+      - 8181:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/:/etc/traefik/
+    networks:
+      - supabase # rename this to your custom docker network
+    
+#    labels:   # Only for Traefik, unless you use the fileConfig.yml file.
+#      traefik.http.routers.api.rule: Host(`traefik.domain.com`)    # Define the subdomain for the traefik dashboard.
+#      traefik.http.routers.api.entryPoints: https    # Set the Traefik entry point.
+#      traefik.http.routers.api.service: api@internal    # Enable Traefik API.
+#      traefik.enable: true   # Enable Traefik reverse proxy for the Traefik dashboard.
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      - dockersocket
+      
+  dockersocket:
+    container_name: dockersocket
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - supabase
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    privileged: true
+    restart: unless-stopped
 
 networks:
-    rp:
+  supabase:
+    driver: bridge
+    external: true
