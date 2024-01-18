@@ -21,6 +21,8 @@ services:
 #      traefik.enable: true   # Enable Traefik reverse proxy for the Traefik dashboard.
     environment:
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+      CLOUDFLARE_EMAIL: ${$CLOUDFLARE_EMAIL}
+      DOMAIN: ${DOMAIN}
     restart: unless-stopped
     depends_on:
       - dockersocket

@@ -23,9 +23,9 @@ entryPoints:
         # Generate a wildcard domain certificate
         certResolver: letsencrypt
         domains:
-          - main: domain.com        # Change
+          - main: $DOMAIN
             sans:
-              - '*.domain.com'      # Change
+              - '*.$DOMAIN'
       middlewares:
         - securityHeaders@file
 
@@ -42,7 +42,7 @@ providers:
     watch: true
     network: supabase
     # Default host rule to containername.domain.example
-    defaultRule: "Host(`{{ lower (trimPrefix `/` .Name )}}.domain.com`)"
+    defaultRule: "Host(`{{ lower (trimPrefix `/` .Name )}}.$DOMAIN`)"
     swarmModeRefreshSeconds: 15s
     exposedByDefault: false
 
@@ -59,7 +59,7 @@ log:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: cloudflareEmail@gmail.com  # Change
+      email: $CLOUDFLARE_EMAIL
       storage: /etc/traefik/acme.json
       dnsChallenge:
         provider: cloudflare

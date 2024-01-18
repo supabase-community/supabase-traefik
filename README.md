@@ -21,6 +21,29 @@ Navigate to the repository folder:
 cd supabase-traefik
 ```
 
+### Setting Up Traefik
+
+If you haven't set up Traefik before, navigate to the Traefik directory:
+
+```bash
+cd traefik
+```
+
+Copy the example environment variables:
+
+```bash
+cp .env.example .env
+```
+
+In the `.env`, replace all the variable values to your own.
+
+
+After configuring all the files, you can start Traefik using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
 ### Setting Up Supabase
 
 Get the Supabase code by cloning the Supabase repository:
@@ -50,25 +73,7 @@ networks:
 
 Change the network name to match the one used by Traefik if necessary.
 
-### Setting Up Traefik
-
-If you haven't set up Traefik before, navigate to the Traefik directory:
-
-```bash
-cd traefik
-```
-
-Copy the example environment variables:
-
-```bash
-cp .env.example .env
-```
-
-Replace the value inside the `CF_DNS_API_TOKEN` variable. Then, edit the `traefik.yml` and `fileConfig.yml` files, replacing `domain.com`, `IPv4`, and `cloudflareEmail@gmail.com` with the appropriate values.
-
-## Running the Setup
-
-After configuring all the files, you can start the services using Docker Compose:
+After configuring all the files, you can start the Supabase services using Docker Compose:
 
 ```bash
 docker-compose up -d

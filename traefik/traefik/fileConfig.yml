@@ -6,7 +6,7 @@ http:
     traefik:
       entryPoints:
         - https
-      rule: "Host(`traefik.domain.com`)"
+      rule: "Host(`traefik.$DOMAIN`)"
       service: traefik
       middlewares:
         - "securityHeaders"
@@ -15,7 +15,7 @@ http:
     supabase-kong:
       entryPoints:
         - https
-      rule: "Host(`studio.domain.com`)"
+      rule: "Host(`studio.$DOMAIN`)"
       service: supabase-kong
       middlewares:
         - "securityHeaders"
@@ -24,7 +24,7 @@ http:
     supabase-analytics:
       entryPoints:
         - https
-      rule: "Host(`analytics.domain.com`)"
+      rule: "Host(`analytics.$DOMAIN`)"
       service: supabase-analytics
       middlewares:
         - "securityHeaders"
@@ -37,7 +37,7 @@ http:
     traefik:
       loadBalancer:
         servers:
-          - url: http://IPv4:8181
+          - url: http://$IPV4:8181
 
     # Supabase Kong service
     supabase-kong:
