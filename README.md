@@ -35,7 +35,7 @@ Copy the example environment variables:
 cp .env.example .env
 ```
 
-In the `.env`, replace all the variable values to your own.
+In the `.env`, replace all the variable values with your own.
 
 
 After configuring all the files, you can start Traefik using Docker Compose:
