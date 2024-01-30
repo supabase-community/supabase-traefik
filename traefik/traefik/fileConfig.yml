@@ -1,0 +1,79 @@
+http:
+  routers:
+    ###############################################################################################################################################################################
+
+    ## EXTERNAL ROUTING ##
+    traefik:
+      entryPoints:
+        - https
+      rule: "Host(`traefik.$DOMAIN`)"
+      service: traefik
+      middlewares:
+        - "securityHeaders"
+
+    #Supabase Kong routing
+    supabase-kong:
+      entryPoints:
+        - https
+      rule: "Host(`studio.$DOMAIN`)"
+      service: supabase-kong
+      middlewares:
+        - "securityHeaders"
+
+    #Supabase Analytics routing
+    supabase-analytics:
+      entryPoints:
+        - https
+      rule: "Host(`analytics.$DOMAIN`)"
+      service: supabase-analytics
+      middlewares:
+        - "securityHeaders"
+
+########################################################################################################################################################################
+
+  ## SERVICES ##
+  services:
+    # Traefik service
+    traefik:
+      loadBalancer:
+        servers:
+          - url: http://$IPV4:8181
+
+    # Supabase Kong service
+    supabase-kong:
+      loadbalancer:
+        servers:
+          - url: "http://IPv4:8000"
+
+
+    # Supabase Analytics service
+    supabase-analytics:
+      loadbalancer:
+        servers:
+          - url: "http://IPv4:4000"
+
+
+  ###############################################################################################################################################################################
+
+  ## MIDDLEWARES ##
+  middlewares:
+
+    # Security headers
+    securityHeaders:
+      headers:
+        customResponseHeaders:
+          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex"
+          server: ""
+        sslProxyHeaders:
+          X-Forwarded-Proto: https
+        referrerPolicy: "same-origin"
+        hostsProxyHeaders:
+          - "X-Forwarded-Host"
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+        contentTypeNosniff: true
+        browserXssFilter: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsSeconds: 63072000
+        stsPreload: true

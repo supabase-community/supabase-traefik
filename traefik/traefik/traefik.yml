@@ -1,13 +1,69 @@
-tls:
-    options:
-        default:
-            minVersion: VersionTLS12
-            cipherSuites:
-                - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-                - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-                - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
-    stores:
-        default:
-            defaultCertificate:
-                certFile: "/letsencrypt/pem/cert.pem"
-                keyFile: "/letsencrypt/pem/key.pem"
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+serversTransport:
+  insecureSkipVerify: true
+
+entryPoints:
+  # Not used in apps, but redirect everything from HTTP to HTTPS
+  http:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+
+  # HTTPS endpoint, with domain wildcard
+  https:
+    address: :443
+    http:
+      tls:
+        # Generate a wildcard domain certificate
+        certResolver: letsencrypt
+        domains:
+          - main: $DOMAIN
+            sans:
+              - '*.$DOMAIN'
+      middlewares:
+        - securityHeaders@file
+
+providers:
+  providersThrottleDuration: 2s
+
+  # File provider for connecting things that are outside of docker / defining middleware
+  file:
+    filename: /etc/traefik/fileConfig.yml
+    watch: true
+
+  # Docker provider for connecting all apps that are inside of the docker network
+  docker:
+    watch: true
+    network: supabase
+    # Default host rule to containername.domain.example
+    defaultRule: "Host(`{{ lower (trimPrefix `/` .Name )}}.$DOMAIN`)"
+    swarmModeRefreshSeconds: 15s
+    exposedByDefault: false
+
+# Enable traefik ui
+api:
+  dashboard: true
+  insecure: true
+
+# Log level INFO|DEBUG|ERROR
+log:
+  level: INFO
+
+# Use letsencrypt to generate ssl serficiates
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: $CLOUDFLARE_EMAIL
+      storage: /etc/traefik/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        # Used to make sure the dns challenge is propagated to the rights dns servers
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
